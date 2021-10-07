@@ -1,12 +1,13 @@
 # from im2mesh import icp
 import logging
+
 import numpy as np
 import trimesh
+
+from im2mesh.common import compute_iou
 # from scipy.spatial import cKDTree
 from im2mesh.utils.libkdtree import KDTree
 from im2mesh.utils.libmesh import check_mesh_contains
-from im2mesh.common import compute_iou
-
 
 # Maximum values for bounding box [-0.5, 0.5]^3
 EMPTY_PCL_DICT = {
@@ -94,7 +95,7 @@ class MeshEvaluator(object):
         completeness, completeness_normals = distance_p2p(
             pointcloud_tgt, normals_tgt, pointcloud, normals
         )
-        completeness2 = completeness**2
+        completeness2 = completeness ** 2
 
         completeness = completeness.mean()
         completeness2 = completeness2.mean()
@@ -105,7 +106,7 @@ class MeshEvaluator(object):
         accuracy, accuracy_normals = distance_p2p(
             pointcloud, normals, pointcloud_tgt, normals_tgt
         )
-        accuracy2 = accuracy**2
+        accuracy2 = accuracy ** 2
 
         accuracy = accuracy.mean()
         accuracy2 = accuracy2.mean()
@@ -114,7 +115,7 @@ class MeshEvaluator(object):
         # Chamfer distance
         chamferL2 = 0.5 * (completeness2 + accuracy2)
         normals_correctness = (
-            0.5 * completeness_normals + 0.5 * accuracy_normals
+                0.5 * completeness_normals + 0.5 * accuracy_normals
         )
         chamferL1 = 0.5 * (completeness + accuracy)
 

@@ -93,5 +93,8 @@ def get_data_fields(split, cfg, **kwargs):
             with_transforms=with_transforms,
             unpackbits=cfg['data']['points_unpackbits'],
         )
+        voxels_file = cfg['data']['voxels_file']
+        if voxels_file is not None:
+            fields['voxels'] = data.VoxelsField(voxels_file)
 
     return fields

@@ -17,6 +17,7 @@ training:
   model_selection_metric: iou
   model_selection_mode: maximize
 test:
+  model_file: out/pointcloud/r2n2/model_best.pt
   threshold: 0.4
   eval_mesh: true
   eval_pointcloud: false

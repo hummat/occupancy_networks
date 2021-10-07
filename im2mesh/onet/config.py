@@ -1,11 +1,13 @@
+import os
+
 import torch
 import torch.distributions as dist
 from torch import nn
-import os
+
+from im2mesh import config
+from im2mesh import data
 from im2mesh.encoder import encoder_dict
 from im2mesh.onet import models, training, generation
-from im2mesh import data
-from im2mesh import config
 
 
 def get_model(cfg, device=None, dataset=None, **kwargs):
@@ -100,6 +102,8 @@ def get_generator(model, cfg, device, **kwargs):
         sample=cfg['generation']['use_sampling'],
         refinement_step=cfg['generation']['refinement_step'],
         simplify_nfaces=cfg['generation']['simplify_nfaces'],
+        points_batch_size=cfg['generation']['batch_size'],
+        with_normals=cfg['generation']['normals'],
         preprocessor=preprocessor,
     )
     return generator
@@ -131,12 +135,11 @@ def get_data_fields(mode, cfg):
     points_transform = data.SubsamplePoints(cfg['data']['points_subsample'])
     with_transforms = cfg['model']['use_camera']
 
-    fields = {}
-    fields['points'] = data.PointsField(
+    fields = {'points': data.PointsField(
         cfg['data']['points_file'], points_transform,
         with_transforms=with_transforms,
         unpackbits=cfg['data']['points_unpackbits'],
-    )
+    )}
 
     if mode in ('val', 'test'):
         points_iou_file = cfg['data']['points_iou_file']

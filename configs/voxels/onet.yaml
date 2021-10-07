@@ -20,7 +20,13 @@ test:
   eval_mesh: true
   eval_pointcloud: false
 generation:
-  batch_size: 100000
+  resolution_0: 32
+  upsampling_steps: 3
+  # refinement_step: 0
+  # use_sampling: false
+  simplify_nfaces: 50000
+  batch_size: 250000
   refine: false
   n_x: 128
   n_z: 1
+  normals: false

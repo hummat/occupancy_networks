@@ -1,6 +1,6 @@
 import argparse
-import numpy as np
 
+import numpy as np
 
 parser = argparse.ArgumentParser(
     description='Convert camera from Choy et al. format to npz file.')
@@ -20,7 +20,6 @@ CAM_MAX_DIST = 1.75
 IMG_W = 127 + 10  # Rendering image size. Network input size + cropping margin.
 IMG_H = 127 + 10
 
-
 CAM_ROT = np.matrix(((1.910685676922942e-15, 4.371138828673793e-08, 1.0),
                      (1.0, -4.371138828673793e-08, -0.0),
                      (4.371138828673793e-08, 1.0, -4.371138828673793e-08)))
@@ -32,7 +31,7 @@ blender_T = np.array([
 ])
 
 
-def getBlenderProj(az, el, distance_ratio, img_w=IMG_W, img_h=IMG_H):
+def get_blender_projection(az, el, distance_ratio, img_w=IMG_W, img_h=IMG_H):
     """Calculate 4x3 3D to 2D projection matrix given viewpoint parameters."""
 
     # Calculate intrinsic matrix.
@@ -78,7 +77,7 @@ def main(args):
     data = np.array([[float(e) for e in l.split()] for l in lines])
     out_dict = {}
     for idx in range(data.shape[0]):
-        K, RT = getBlenderProj(data[idx, 0], data[idx, 1], data[idx, 3])
+        K, RT = get_blender_projection(data[idx, 0], data[idx, 1], data[idx, 3])
         RT = np.asarray(RT)
         K = np.asarray(K)
         M = RT[:, :3] @ blender_T

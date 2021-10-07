@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from torchvision.utils import save_image
+
 import im2mesh.common as common
 
 
@@ -40,7 +41,7 @@ def visualize_voxels(voxels, out_file=None, show=False):
     # Create plot
     fig = plt.figure()
     ax = fig.gca(projection=Axes3D.name)
-    voxels = voxels.transpose(2, 0, 1)
+    voxels = voxels.transpose((2, 0, 1))
     ax.voxels(voxels, edgecolor='k')
     ax.set_xlabel('Z')
     ax.set_ylabel('X')
@@ -53,8 +54,7 @@ def visualize_voxels(voxels, out_file=None, show=False):
     plt.close(fig)
 
 
-def visualize_pointcloud(points, normals=None,
-                         out_file=None, show=False):
+def visualize_pointcloud(points, normals=None, out_file=None, show=False):
     r''' Visualizes point cloud data.
 
     Args:
@@ -89,8 +89,7 @@ def visualize_pointcloud(points, normals=None,
     plt.close(fig)
 
 
-def visualise_projection(
-        self, points, world_mat, camera_mat, img, output_file='out.png'):
+def visualise_projection(points, world_mat, camera_mat, img, output_file='out.png'):
     r''' Visualizes the transformation and projection to image plane.
 
         The first points of the batch are transformed and projected to the
@@ -112,6 +111,6 @@ def visualise_projection(
     image = img[0].cpu().numpy()
     plt.imshow(image.transpose(1, 2, 0))
     plt.plot(
-        (pimg2[:, 0] + 1)*image.shape[1]/2,
-        (pimg2[:, 1] + 1) * image.shape[2]/2, 'x')
+        (pimg2[:, 0] + 1) * image.shape[1] / 2,
+        (pimg2[:, 1] + 1) * image.shape[2] / 2, 'x')
     plt.savefig(output_file)

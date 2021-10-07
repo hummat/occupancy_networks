@@ -1,10 +1,11 @@
 method: onet
 data:
   input_type: pointcloud
+  classes: ["02876657", "02880940", "02946921", "03797390"]
   path: data/ShapeNet
   pointcloud_n: 300
   pointcloud_noise: 0.005
-  points_subsample: 2048 
+  points_subsample: 2048
 model:
   encoder_latent: null
   decoder: cbatchnorm
@@ -15,15 +16,22 @@ model:
   z_dim: 0
 training:
   out_dir:  out/pointcloud/onet
-  batch_size: 64
+  batch_size: 32
   model_selection_metric: iou
   model_selection_mode: maximize
 test:
   threshold: 0.2
   eval_mesh: true
   eval_pointcloud: false
+  model_file: out/pointcloud/onet/model_best.pt
 generation:
-  batch_size: 100000
+  resolution_0: 32
+  upsampling_steps: 2
+  # refinement_step: 0
+  # use_sampling: false
+  # simplify_nfaces: 50000
+  batch_size: 250000
+  normals: false
   refine: false
   n_x: 128
   n_z: 1

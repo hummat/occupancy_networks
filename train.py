@@ -1,14 +1,16 @@
+import argparse
+import os
+import time
+
+import matplotlib;
+import numpy as np
 import torch
 import torch.optim as optim
 from tensorboardX import SummaryWriter
-import numpy as np
-import os
-import argparse
-import time
-import matplotlib; matplotlib.use('Agg')
+
+matplotlib.use('Agg')
 from im2mesh import config, data
 from im2mesh.checkpoints import CheckpointIO
-
 
 # Arguments
 parser = argparse.ArgumentParser(
@@ -60,7 +62,6 @@ val_loader = torch.utils.data.DataLoader(
     val_dataset, batch_size=10, num_workers=4, shuffle=False,
     collate_fn=data.collate_remove_none,
     worker_init_fn=data.worker_init_fn)
-
 
 # For visualizations
 vis_loader = torch.utils.data.DataLoader(
@@ -117,7 +118,7 @@ print('Total number of parameters: %d' % nparameters)
 
 while True:
     epoch_it += 1
-#     scheduler.step()
+    #     scheduler.step()
 
     for batch in train_loader:
         it += 1
@@ -132,16 +133,16 @@ while True:
         # Visualize output
         if visualize_every > 0 and (it % visualize_every) == 0:
             print('Visualizing')
-            trainer.visualize(data_vis)
+            trainer.visualize_all(data_vis)
 
         # Save checkpoint
-        if (checkpoint_every > 0 and (it % checkpoint_every) == 0):
+        if checkpoint_every > 0 and (it % checkpoint_every) == 0:
             print('Saving checkpoint')
             checkpoint_io.save('model.pt', epoch_it=epoch_it, it=it,
                                loss_val_best=metric_val_best)
 
         # Backup if necessary
-        if (backup_every > 0 and (it % backup_every) == 0):
+        if backup_every > 0 and (it % backup_every) == 0:
             print('Backup checkpoint')
             checkpoint_io.save('model_%d.pt' % it, epoch_it=epoch_it, it=it,
                                loss_val_best=metric_val_best)
@@ -162,7 +163,7 @@ while True:
                                    loss_val_best=metric_val_best)
 
         # Exit if necessary
-        if exit_after > 0 and (time.time() - t0) >= exit_after:
+        if 0 < exit_after <= (time.time() - t0):
             print('Time limit reached. Exiting.')
             checkpoint_io.save('model.pt', epoch_it=epoch_it, it=it,
                                loss_val_best=metric_val_best)

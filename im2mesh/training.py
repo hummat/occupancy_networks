@@ -1,18 +1,18 @@
 # from im2mesh import icp
-import numpy as np
 from collections import defaultdict
+
+import numpy as np
 from tqdm import tqdm
 
 
 class BaseTrainer(object):
-    ''' Base trainer class.
-    '''
+    """ Base trainer class."""
 
     def evaluate(self, val_loader):
-        ''' Performs an evaluation.
+        """ Performs an evaluation.
         Args:
             val_loader (dataloader): pytorch dataloader
-        '''
+        """
         eval_list = defaultdict(list)
 
         for data in tqdm(val_loader):
@@ -25,16 +25,13 @@ class BaseTrainer(object):
         return eval_dict
 
     def train_step(self, *args, **kwargs):
-        ''' Performs a training step.
-        '''
+        """ Performs a training step."""
         raise NotImplementedError
 
     def eval_step(self, *args, **kwargs):
-        ''' Performs an evaluation step.
-        '''
+        """ Performs an evaluation step."""
         raise NotImplementedError
 
     def visualize(self, *args, **kwargs):
-        ''' Performs  visualization.
-        '''
+        """ Performs  visualization."""
         raise NotImplementedError

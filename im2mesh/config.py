@@ -1,9 +1,9 @@
 import yaml
 from torchvision import transforms
+
 from im2mesh import data
 from im2mesh import onet, r2n2, psgn, pix2mesh, dmc
 from im2mesh import preprocess
-
 
 method_dict = {
     'onet': onet,
@@ -170,7 +170,7 @@ def get_dataset(mode, cfg, return_idx=False, return_category=False):
         )
     else:
         raise ValueError('Invalid dataset "%s"' % cfg['data']['dataset'])
- 
+
     return dataset
 
 

@@ -1,5 +1,6 @@
-import torch
 import numpy as np
+import torch
+
 from im2mesh.dmc.ops.cpp_modules import pred2mesh
 
 
@@ -8,7 +9,7 @@ def unique_rows(a):
     rowtype = np.dtype((np.void, a.dtype.itemsize * a.shape[1]))
     b = np.ascontiguousarray(a).view(rowtype)
     _, idx, inverse = np.unique(b, return_index=True, return_inverse=True)
-    return a[idx], inverse 
+    return a[idx], inverse
 
 
 def pred_to_mesh_max(offset, topology):
@@ -28,23 +29,23 @@ def pred_to_mesh_max(offset, topology):
     trimesh format
          mesh 
     
-    """ 
+    """
     # get the topology type with maximum probability in each cell
     num_cells = offset.size(1) - 1
     _, topology_max = torch.max(topology, dim=1)
     topology_max = topology_max.view(num_cells, num_cells, num_cells)
 
     # pre-allocate the memory, not safe
-    vertices = torch.FloatTensor(num_cells**3 * 12, 3)
-    faces = torch.FloatTensor(num_cells**3 * 12, 3)
+    vertices = torch.FloatTensor(num_cells ** 3 * 12, 3)
+    faces = torch.FloatTensor(num_cells ** 3 * 12, 3)
     num_vertices = torch.LongTensor(1)
     num_faces = torch.LongTensor(1)
     topology_max = topology_max.int()
 
     # get the mesh from the estimated offest and topology
     pred2mesh.pred2mesh(offset.cpu(), topology_max.cpu(),
-            vertices, faces, num_vertices, num_faces)
-    
+                        vertices, faces, num_vertices, num_faces)
+
     # cut the vertices and faces matrix according to the numbers
     vertices = vertices[0:num_vertices[0], :].numpy()
     faces = faces[0:num_faces[0], :].numpy()
@@ -61,7 +62,6 @@ def pred_to_mesh_max(offset, topology):
     # else:
     #     vertices_unique = []
     #     faces_unique = []
-
 
     # if len(vertices_unique):
     #     vertices_unique = vertices_unique[:, [2, 0, 1]]

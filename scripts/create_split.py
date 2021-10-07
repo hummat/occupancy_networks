@@ -52,12 +52,12 @@ if n_total < n_val + n_test:
 
 n_train = n_total - n_val - n_test
 
-assert(n_train >= 0)
+assert (n_train >= 0)
 
 # Select elements
 train_set = all_samples[:n_train]
-val_set = all_samples[n_train:n_train+n_val]
-test_set = all_samples[n_train+n_val:]
+val_set = all_samples[n_train:n_train + n_val]
+test_set = all_samples[n_train + n_val:]
 
 # Write to file
 with open(os.path.join(args.in_folder, 'train.lst'), 'w') as f:

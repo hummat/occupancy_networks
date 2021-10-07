@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - pytorch
   - defaults
+  - anaconda
 dependencies:
   - cython=0.29.2
   - imageio=2.4.1
@@ -23,7 +24,9 @@ dependencies:
   - torchvision=0.2.1
   - tqdm=4.28.1
   - trimesh=2.37.7
+  - networkx=2.2
+  - mkl=2020.2
+  - pyglet=1.5.16
   - pip:
-    - h5py==2.9.0
-    - plyfile==0.7
-
+      - h5py==2.9.0
+      - plyfile==0.7

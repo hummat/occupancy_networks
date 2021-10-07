@@ -1,17 +1,17 @@
 # import multiprocessing
-import torch
-from im2mesh.utils.libkdtree import KDTree
 import numpy as np
+import torch
+
+from im2mesh.utils.libkdtree import KDTree
 
 
 def compute_iou(occ1, occ2):
-    ''' Computes the Intersection over Union (IoU) value for two sets of
-    occupancy values.
+    """ Computes the Intersection over Union (IoU) value for two sets of occupancy values.
 
     Args:
         occ1 (tensor): first set of occupancy values
         occ2 (tensor): second set of occupancy values
-    '''
+    """
     occ1 = np.asarray(occ1)
     occ2 = np.asarray(occ2)
 
@@ -36,14 +36,14 @@ def compute_iou(occ1, occ2):
 
 
 def chamfer_distance(points1, points2, use_kdtree=True, give_id=False):
-    ''' Returns the chamfer distance for the sets of points.
+    """ Returns the chamfer distance for the sets of points.
 
     Args:
         points1 (numpy array): first point set
         points2 (numpy array): second point set
         use_kdtree (bool): whether to use a kdtree
         give_id (bool): whether to return the IDs of nearest points
-    '''
+    """
     if use_kdtree:
         return chamfer_distance_kdtree(points1, points2, give_id=give_id)
     else:
@@ -51,13 +51,13 @@ def chamfer_distance(points1, points2, use_kdtree=True, give_id=False):
 
 
 def chamfer_distance_naive(points1, points2):
-    ''' Naive implementation of the Chamfer distance.
+    """ Naive implementation of the Chamfer distance.
 
     Args:
         points1 (numpy array): first point set
         points2 (numpy array): second point set    
-    '''
-    assert(points1.size() == points2.size())
+    """
+    assert (points1.size() == points2.size())
     batch_size, T, _ = points1.size()
 
     points1 = points1.view(batch_size, T, 1, 3)
@@ -73,13 +73,13 @@ def chamfer_distance_naive(points1, points2):
 
 
 def chamfer_distance_kdtree(points1, points2, give_id=False):
-    ''' KD-tree based implementation of the Chamfer distance.
+    """ KD-tree based implementation of the Chamfer distance.
 
     Args:
         points1 (numpy array): first point set
         points2 (numpy array): second point set
         give_id (bool): whether to return the IDs of the nearest points
-    '''
+    """
     # Points have size batch_size x T x 3
     batch_size = points1.size(0)
 
@@ -122,13 +122,13 @@ def chamfer_distance_kdtree(points1, points2, give_id=False):
 
 
 def get_nearest_neighbors_indices_batch(points_src, points_tgt, k=1):
-    ''' Returns the nearest neighbors for point sets batchwise.
+    """ Returns the nearest neighbors for point sets batchwise.
 
     Args:
         points_src (numpy array): source points
         points_tgt (numpy array): target points
         k (int): number of nearest neighbors to return
-    '''
+    """
     indices = []
     distances = []
 
@@ -142,11 +142,11 @@ def get_nearest_neighbors_indices_batch(points_src, points_tgt, k=1):
 
 
 def normalize_imagenet(x):
-    ''' Normalize input images according to ImageNet standards.
+    """ Normalize input images according to ImageNet standards.
 
     Args:
         x (tensor): input images
-    '''
+    """
     x = x.clone()
     x[:, 0] = (x[:, 0] - 0.485) / 0.229
     x[:, 1] = (x[:, 1] - 0.456) / 0.224
@@ -155,13 +155,13 @@ def normalize_imagenet(x):
 
 
 def make_3d_grid(bb_min, bb_max, shape):
-    ''' Makes a 3D grid.
+    """ Makes a 3D grid.
 
     Args:
         bb_min (tuple): bounding box minimum
         bb_max (tuple): bounding box maximum
         shape (tuple): output shape
-    '''
+    """
     size = shape[0] * shape[1] * shape[2]
 
     pxs = torch.linspace(bb_min[0], bb_max[0], shape[0])
@@ -177,15 +177,15 @@ def make_3d_grid(bb_min, bb_max, shape):
 
 
 def transform_points(points, transform):
-    ''' Transforms points with regard to passed camera information.
+    """ Transforms points with regard to passed camera information.
 
     Args:
         points (tensor): points tensor
         transform (tensor): transformation matrices
-    '''
-    assert(points.size(2) == 3)
-    assert(transform.size(1) == 3)
-    assert(points.size(0) == transform.size(0))
+    """
+    assert (points.size(2) == 3)
+    assert (transform.size(1) == 3)
+    assert (points.size(0) == transform.size(0))
 
     if transform.size(2) == 4:
         R = transform[:, :, :3]
@@ -199,11 +199,11 @@ def transform_points(points, transform):
 
 
 def b_inv(b_mat):
-    ''' Performs batch matrix inversion.
+    """ Performs batch matrix inversion.
 
     Arguments:
         b_mat: the batch of matrices that should be inverted
-    '''
+    """
 
     eye = b_mat.new_ones(b_mat.size(-1)).diag().expand_as(b_mat)
     b_inv, _ = torch.gesv(eye, b_mat)
@@ -211,15 +211,15 @@ def b_inv(b_mat):
 
 
 def transform_points_back(points, transform):
-    ''' Inverts the transformation.
+    """ Inverts the transformation.
 
     Args:
         points (tensor): points tensor
         transform (tensor): transformation matrices
-    '''
-    assert(points.size(2) == 3)
-    assert(transform.size(1) == 3)
-    assert(points.size(0) == transform.size(0))
+    """
+    assert (points.size(2) == 3)
+    assert (transform.size(1) == 3)
+    assert (points.size(0) == transform.size(0))
 
     if transform.size(2) == 4:
         R = transform[:, :, :3]
@@ -234,26 +234,26 @@ def transform_points_back(points, transform):
 
 
 def project_to_camera(points, transform):
-    ''' Projects points to the camera plane.
+    """ Projects points to the camera plane.
 
     Args:
         points (tensor): points tensor
         transform (tensor): transformation matrices
-    '''
+    """
     p_camera = transform_points(points, transform)
     p_camera = p_camera[..., :2] / p_camera[..., 2:]
     return p_camera
 
 
 def get_camera_args(data, loc_field=None, scale_field=None, device=None):
-    ''' Returns dictionary of camera arguments.
+    """ Returns dictionary of camera arguments.
 
     Args:
         data (dict): data dictionary
         loc_field (str): name of location field
         scale_field (str): name of scale field
         device (device): pytorch device
-    '''
+    """
     Rt = data['inputs.world_mat'].to(device)
     K = data['inputs.camera_mat'].to(device)
 
@@ -274,13 +274,13 @@ def get_camera_args(data, loc_field=None, scale_field=None, device=None):
 
 
 def fix_Rt_camera(Rt, loc, scale):
-    ''' Fixes Rt camera matrix.
+    """ Fixes Rt camera matrix.
 
     Args:
         Rt (tensor): Rt camera matrix
         loc (tensor): location
         scale (float): scale
-    '''
+    """
     # Rt is B x 3 x 4
     # loc is B x 3 and scale is B
     batch_size = Rt.size(0)
@@ -293,7 +293,7 @@ def fix_Rt_camera(Rt, loc, scale):
 
     Rt_new = torch.cat([R_new, t_new], dim=2)
 
-    assert(Rt_new.size() == (batch_size, 3, 4))
+    assert (Rt_new.size() == (batch_size, 3, 4))
     return Rt_new
 
 
@@ -309,8 +309,8 @@ def fix_K_camera(K, img_size=137):
     """
     # Unscale and recenter
     scale_mat = torch.tensor([
-        [2./img_size, 0, -1],
-        [0, 2./img_size, -1],
+        [2. / img_size, 0, -1],
+        [0, 2. / img_size, -1],
         [0, 0, 1.],
     ], device=K.device, dtype=K.dtype)
     K_new = scale_mat.view(1, 3, 3) @ K

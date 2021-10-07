@@ -1,16 +1,17 @@
 import argparse
-import trimesh
-import numpy as np
-import os
 import glob
+import os
 import sys
-from multiprocessing import Pool
 from functools import partial
+from multiprocessing import Pool
+
+import numpy as np
+import trimesh
+
 # TODO: do this better
 sys.path.append('..')
 from im2mesh.utils import binvox_rw, voxels
 from im2mesh.utils.libmesh import check_mesh_contains
-
 
 parser = argparse.ArgumentParser('Sample a watertight mesh.')
 parser.add_argument('in_folder', type=str,
@@ -27,8 +28,7 @@ parser.add_argument('--rotate_xz', type=float, default=0.,
 parser.add_argument('--bbox_padding', type=float, default=0.,
                     help='Padding for bounding box')
 parser.add_argument('--bbox_in_folder', type=str,
-                    help='Path to other input folder to extract'
-                         'bounding boxes.')
+                    help='Path to other input folder to extract bounding boxes.')
 
 parser.add_argument('--pointcloud_folder', type=str,
                     help='Output path for point cloud.')
@@ -62,8 +62,9 @@ parser.add_argument('--overwrite', action='store_true',
 parser.add_argument('--float16', action='store_true',
                     help='Whether to use half precision.')
 parser.add_argument('--packbits', action='store_true',
-                help='Whether to save truth values as bit array.')
-    
+                    help='Whether to save truth values as bit array.')
+
+
 def main(args):
     input_files = glob.glob(os.path.join(args.in_folder, '*.off'))
     if args.n_proc != 0:
@@ -81,7 +82,7 @@ def process_path(in_path, args):
 
     # Determine bounding box
     if not args.resize:
-        # Standard bounding boux
+        # Standard bounding box
         loc = np.zeros(3)
         scale = 1.
     else:
@@ -155,7 +156,7 @@ def export_voxels(mesh, modelname, loc, scale, args):
         return
 
     res = args.voxels_res
-    voxels_occ = voxels.voxelize(mesh, res)
+    voxels_occ = voxels.voxelize_ray(mesh, res)
 
     voxels_out = binvox_rw.Voxels(voxels_occ, (res,) * 3,
                                   translate=loc, scale=scale,
@@ -206,7 +207,7 @@ def export_points(mesh, modelname, loc, scale, args):
 
 
 def export_mesh(mesh, modelname, loc, scale, args):
-    filename = os.path.join(args.mesh_folder, modelname + '.off')    
+    filename = os.path.join(args.mesh_folder, modelname + '.off')
     if not args.overwrite and os.path.exists(filename):
         print('Mesh already exist: %s' % filename)
         return

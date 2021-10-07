@@ -1,14 +1,16 @@
+import time
+
+import numpy as np
 import torch
 import torch.optim as optim
-from torch import autograd
-import numpy as np
-from tqdm import trange
 import trimesh
-from im2mesh.utils import libmcubes
+from torch import autograd
+from tqdm import trange
+
 from im2mesh.common import make_3d_grid
-from im2mesh.utils.libsimplify import simplify_mesh
+from im2mesh.utils import libmcubes
 from im2mesh.utils.libmise import MISE
-import time
+from im2mesh.utils.libsimplify import simplify_mesh
 
 
 class Generator3D(object):
@@ -102,9 +104,7 @@ class Generator3D(object):
         # Shortcut
         if self.upsampling_steps == 0:
             nx = self.resolution0
-            pointsf = box_size * make_3d_grid(
-                (-0.5,)*3, (0.5,)*3, (nx,)*3
-            )
+            pointsf = box_size * make_3d_grid((-0.5,) * 3, (0.5,) * 3, (nx,) * 3)
             values = self.eval_points(pointsf, z, c, **kwargs).cpu().numpy()
             value_grid = values.reshape(nx, nx, nx)
         else:
@@ -181,7 +181,7 @@ class Generator3D(object):
         # Undo padding
         vertices -= 1
         # Normalize to bounding box
-        vertices /= np.array([n_x-1, n_y-1, n_z-1])
+        vertices /= np.array([n_x - 1, n_y - 1, n_z - 1])
         vertices = box_size * (vertices - 0.5)
 
         # mesh_pymesh = pymesh.form_mesh(vertices, triangles)
@@ -232,7 +232,7 @@ class Generator3D(object):
         vertices_split = torch.split(vertices, self.points_batch_size)
 
         normals = []
-        z, c = z.unsqueeze(0), c.unsqueeze(0)
+        # z, c = z.unsqueeze(0), c.unsqueeze(0)
         for vi in vertices_split:
             vi = vi.unsqueeze(0).to(device)
             vi.requires_grad_()
@@ -261,7 +261,7 @@ class Generator3D(object):
 
         # Some shorthands
         n_x, n_y, n_z = occ_hat.shape
-        assert(n_x == n_y == n_z)
+        assert (n_x == n_y == n_z)
         # threshold = np.log(self.threshold) - np.log(1. - self.threshold)
         threshold = self.threshold
 
@@ -287,20 +287,15 @@ class Generator3D(object):
             face_v1 = face_vertex[:, 1, :] - face_vertex[:, 0, :]
             face_v2 = face_vertex[:, 2, :] - face_vertex[:, 1, :]
             face_normal = torch.cross(face_v1, face_v2)
-            face_normal = face_normal / \
-                (face_normal.norm(dim=1, keepdim=True) + 1e-10)
+            face_normal = face_normal / (face_normal.norm(dim=1, keepdim=True) + 1e-10)
             face_value = torch.sigmoid(
                 self.model.decode(face_point.unsqueeze(0), z, c).logits
             )
-            normal_target = -autograd.grad(
-                [face_value.sum()], [face_point], create_graph=True)[0]
+            normal_target = -autograd.grad([face_value.sum()], [face_point], create_graph=True)[0]
 
-            normal_target = \
-                normal_target / \
-                (normal_target.norm(dim=1, keepdim=True) + 1e-10)
+            normal_target = normal_target / (normal_target.norm(dim=1, keepdim=True) + 1e-10)
             loss_target = (face_value - threshold).pow(2).mean()
-            loss_normal = \
-                (face_normal - normal_target).pow(2).sum(dim=1).mean()
+            loss_normal = (face_normal - normal_target).pow(2).sum(dim=1).mean()
 
             loss = loss_target + 0.01 * loss_normal
 

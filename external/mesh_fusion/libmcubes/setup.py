@@ -6,6 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 from Cython.Build import cythonize
+from Cython.Distutils import build_ext
 
 import numpy
 from distutils.extension import Extension
@@ -26,6 +27,7 @@ mcubes_module = Extension(
 )
 
 setup(name="PyMCubes",
+    cmdclass= {'build_ext': build_ext},
     version="0.0.6",
     description="Marching cubes for Python",
     author="Pablo Márquez Neila",

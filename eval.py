@@ -1,16 +1,14 @@
 import argparse
 import os
+
 import pandas as pd
 import torch
-import numpy as np
 from tqdm import tqdm
+
 from im2mesh import config, data
 from im2mesh.checkpoints import CheckpointIO
 
-
-parser = argparse.ArgumentParser(
-    description='Evaluate mesh algorithms.'
-)
+parser = argparse.ArgumentParser(description='Evaluate mesh algorithms.')
 parser.add_argument('config', type=str, help='Path to config file.')
 parser.add_argument('--no-cuda', action='store_true', help='Do not use cuda.')
 
@@ -47,9 +45,8 @@ print('Total number of parameters: %d' % nparameters)
 # Evaluate
 model.eval()
 
-eval_dicts = []   
+eval_dicts = []
 print('Evaluating networks...')
-
 
 test_loader = torch.utils.data.DataLoader(
     dataset, batch_size=1, shuffle=False,
@@ -68,7 +65,7 @@ for it, data in enumerate(tqdm(test_loader)):
         model_dict = dataset.get_model_dict(idx)
     except AttributeError:
         model_dict = {'model': str(idx), 'category': 'n/a'}
-    
+
     modelname = model_dict['model']
     category_id = model_dict['category']
 
@@ -81,12 +78,11 @@ for it, data in enumerate(tqdm(test_loader)):
         'idx': idx,
         'class id': category_id,
         'class name': category_name,
-        'modelname':modelname,
+        'modelname': modelname,
     }
     eval_dicts.append(eval_dict)
     eval_data = trainer.eval_step(data)
     eval_dict.update(eval_data)
-
 
 # Create pandas dataframe and save
 eval_df = pd.DataFrame(eval_dicts)

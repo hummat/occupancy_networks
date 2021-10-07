@@ -1,18 +1,19 @@
-import torch
+import argparse
 # import torch.distributions as dist
 import os
 import shutil
-import argparse
-from tqdm import tqdm
 import time
 from collections import defaultdict
+
 import pandas as pd
+import torch
+from tqdm import tqdm
+
 from im2mesh import config
 from im2mesh.checkpoints import CheckpointIO
 from im2mesh.utils.io import export_pointcloud
 from im2mesh.utils.visualize import visualize_data
 from im2mesh.utils.voxels import VoxelGrid
-
 
 parser = argparse.ArgumentParser(
     description='Extract meshes from occupancy process.'
@@ -60,7 +61,6 @@ if generate_pointcloud and not hasattr(generator, 'generate_pointcloud'):
     generate_pointcloud = False
     print('Warning: generator does not support pointcloud generation.')
 
-
 # Loader
 test_loader = torch.utils.data.DataLoader(
     dataset, batch_size=1, num_workers=0, shuffle=False)
@@ -88,7 +88,7 @@ for it, data in enumerate(tqdm(test_loader)):
         model_dict = dataset.get_model_dict(idx)
     except AttributeError:
         model_dict = {'model': str(idx), 'category': 'n/a'}
-    
+
     modelname = model_dict['model']
     category_id = model_dict.get('category', 'n/a')
 
@@ -120,7 +120,7 @@ for it, data in enumerate(tqdm(test_loader)):
 
     if not os.path.exists(in_dir):
         os.makedirs(in_dir)
-    
+
     # Timing dict
     time_dict = {
         'idx': idx,
@@ -136,7 +136,7 @@ for it, data in enumerate(tqdm(test_loader)):
     # Also copy ground truth
     if cfg['generation']['copy_groundtruth']:
         modelpath = os.path.join(
-            dataset.dataset_folder, category_id, modelname, 
+            dataset.dataset_folder, category_id, modelname,
             cfg['data']['watertight_file'])
         out_file_dict['gt'] = modelpath
 

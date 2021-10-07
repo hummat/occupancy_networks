@@ -1,8 +1,10 @@
-import os
-import common
 import argparse
-import numpy as np
+import os
 from multiprocessing import Pool
+
+import numpy as np
+
+import common
 
 
 class Scale:
@@ -18,7 +20,8 @@ class Scale:
         parser = self.get_parser()
         self.options = parser.parse_args()
 
-    def get_parser(self):
+    @staticmethod
+    def get_parser():
         """
         Get parser of tool.
 
@@ -45,7 +48,8 @@ class Scale:
                             help='Overwrites existing files if true.')
         return parser
 
-    def read_directory(self, directory):
+    @staticmethod
+    def read_directory(directory):
         """
         Read directory.
 
@@ -74,24 +78,22 @@ class Scale:
                 if outpath_t is not None:
                     file_exists = (file_exists and os.path.exists(outpath_t))
                 return not file_exists
+
             files = list(filter(file_filter, files))
 
         return files
-
-
 
     def get_outpath(self, filepath):
         filename_m = os.path.basename(filepath)
         outpath_m = os.path.join(self.options.out_dir, filename_m)
 
         if self.options.t_dir is not None:
-            filename_t =  os.path.splitext(filename_m)[0] + '.npz'
+            filename_t = os.path.splitext(filename_m)[0] + '.npz'
             outpath_t = os.path.join(self.options.t_dir, filename_t)
         else:
             outpath_t = None
 
         return outpath_m, outpath_t
-
 
     def run(self):
         """
@@ -132,20 +134,18 @@ class Scale:
             -centers[1],
             -centers[2]
         )
-        scales_inv = (
-            1/scale, 1/scale, 1/scale
-        )
+        scales_inv = (1 / scale, 1 / scale, 1 / scale)
 
         mesh.translate(translation)
         mesh.scale(scales_inv)
 
         print('[Data] %s extents before %f - %f, %f - %f, %f - %f'
-            % (os.path.basename(filepath),
-                bb_min[0], bb_max[0], bb_min[1], bb_max[1], bb_min[2], bb_max[2]))
+              % (os.path.basename(filepath),
+                 bb_min[0], bb_max[0], bb_min[1], bb_max[1], bb_min[2], bb_max[2]))
         bb1_min, bb1_max = mesh.extents()
         print('[Data] %s extents after %f - %f, %f - %f, %f - %f'
-            % (os.path.basename(filepath),
-                bb1_min[0], bb1_max[0], bb1_min[1], bb1_max[1], bb1_min[2], bb1_max[2]))
+              % (os.path.basename(filepath),
+                 bb1_min[0], bb1_max[0], bb1_min[1], bb1_max[1], bb1_min[2], bb1_max[2]))
 
         # May also switch axes if necessary.
         # mesh.switch_axes(1, 2)
@@ -159,6 +159,7 @@ class Scale:
                      loc=centers, scale=scale,
                      bb0_min=bb_min, bb0_max=bb_max,
                      bb1_min=bb1_min, bb1_max=bb1_max)
+
 
 if __name__ == '__main__':
     app = Scale()

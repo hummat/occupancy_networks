@@ -5,6 +5,7 @@ import torch
 from torch.utils import data
 from torchvision import transforms
 
+
 class KittiDataset(data.Dataset):
     r""" Kitti Instance dataset.
 
@@ -29,7 +30,7 @@ class KittiDataset(data.Dataset):
         self.len = len(self.cropped_images)
         self.transform = transform
         self.return_idx = return_idx
-    
+
     def get_model_dict(self, idx):
         model_dict = {
             'model': str(idx),
@@ -105,7 +106,7 @@ class OnlineProductDataset(data.Dataset):
             self.metadata.append({'name': cl})
             self.class_id[cl] = i
             cl_names = np.loadtxt(
-                os.path.join(dataset_folder, cl+'_final.txt'), dtype=np.str)
+                os.path.join(dataset_folder, cl + '_final.txt'), dtype=np.str)
             cl_names = cl_names[:max_number_imgs]
             att = np.vstack(
                 (cl_names, np.full_like(cl_names, cl))).transpose(1, 0)
@@ -126,7 +127,6 @@ class OnlineProductDataset(data.Dataset):
             'category': category_id
         }
         return model_dict
-
 
     def get_model(self, idx):
         ''' Returns the model.
@@ -150,7 +150,7 @@ class OnlineProductDataset(data.Dataset):
         '''
         f = os.path.join(
             self.dataset_folder,
-            self.file_names[idx, 1]+'_final',
+            self.file_names[idx, 1] + '_final',
             self.file_names[idx, 0])
 
         img_in = Image.open(f)
@@ -179,6 +179,7 @@ IMAGE_EXTENSIONS = (
     '.jpg', '.jpeg', '.JPG', '.JPEG', '.png', '.PNG'
 )
 
+
 class ImageDataset(data.Dataset):
     r""" Cars Dataset.
 
@@ -201,7 +202,7 @@ class ImageDataset(data.Dataset):
         self.img_path = dataset_folder
         self.file_list = os.listdir(self.img_path)
         self.file_list = [
-            f for f in self.file_list 
+            f for f in self.file_list
             if os.path.splitext(f)[1] in IMAGE_EXTENSIONS
         ]
         self.len = len(self.file_list)
@@ -221,13 +222,13 @@ class ImageDataset(data.Dataset):
         f_name = os.path.splitext(f_name)[0]
         return f_name
 
-    def get_model_dict(self, idx):  
+    def get_model_dict(self, idx):
         f_name = os.path.basename(self.file_list[idx])
         model_dict = {
             'model': f_name
         }
         return model_dict
-        
+
     def __len__(self):
         ''' Returns the length of the dataset.'''
         return self.len

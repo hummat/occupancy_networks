@@ -1,16 +1,16 @@
+import argparse
 import math
-import numpy as np
 import os
+from multiprocessing import Pool
+
+import numpy as np
 from scipy import ndimage
 from scipy.interpolate import RegularGridInterpolator as rgi
-import common
-import argparse
-import ntpath
 
+import common
+import libmcubes
 # Import shipped libraries.
 import librender
-import libmcubes
-from multiprocessing import Pool
 
 use_gpu = True
 if use_gpu:
@@ -56,10 +56,11 @@ class Fusion:
             1 + 0.75
         ], dtype=float)
         # Derive voxel size from resolution.
-        self.voxel_size = 1./self.options.resolution
-        self.truncation = self.options.truncation_factor*self.voxel_size
+        self.voxel_size = 1. / self.options.resolution
+        self.truncation = self.options.truncation_factor * self.voxel_size
 
-    def get_parser(self):
+    @staticmethod
+    def get_parser():
         """
         Get parser of tool.
 
@@ -115,7 +116,8 @@ class Fusion:
 
         return parser
 
-    def read_directory(self, directory):
+    @staticmethod
+    def read_directory(directory):
         """
         Read directory.
 
@@ -141,6 +143,7 @@ class Fusion:
             def file_filter(filepath):
                 outpath = self.get_outpath(filepath)
                 return not os.path.exists(outpath)
+
             files = list(filter(file_filter, files))
 
         return files
@@ -155,15 +158,15 @@ class Fusion:
         elif self.options.mode == 'sample':
             modelname = os.path.splitext(os.path.splitext(filename)[0])[0]
             outpath = os.path.join(self.options.out_dir, modelname + '.npz')
+        else:
+            raise ValueError
 
         return outpath
-        
+
     def get_points(self):
         """
         See https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere.
 
-        :param n_points: number of points
-        :type n_points: int
         :return: list of points
         :rtype: numpy.ndarray
         """
@@ -191,8 +194,6 @@ class Fusion:
         """
         Generate a set of views to generate depth maps from.
 
-        :param n_views: number of views per axis
-        :type n_views: int
         :return: rotation matrices
         :rtype: [numpy.ndarray]
         """
@@ -221,8 +222,8 @@ class Fusion:
         """
         Render the given mesh using the generated views.
 
-        :param base_mesh: mesh to render
-        :type base_mesh: mesh.Mesh
+        :param mesh: mesh to render
+        :type mesh: mesh.Mesh
         :param Rs: rotation matrices
         :type Rs: [numpy.ndarray]
         :return: depth maps
@@ -407,7 +408,7 @@ class Fusion:
         else:
             df = np.abs(tsdf)
             scale = self.options.sample_scale * df.max()
-            indices = np.arange(N1*N2*N3)
+            indices = np.arange(N1 * N2 * N3)
             prob = np.exp(-df.flatten() / scale)
             prob = prob / prob.sum()
             indices_rnd = np.random.choice(indices, size=npoints, p=prob)

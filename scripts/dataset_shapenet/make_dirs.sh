@@ -1,0 +1,1 @@
+for file in *.npz; do mkdir -- "${file%.npz}"; done

@@ -1,23 +1,24 @@
 import os
-from tqdm import trange
-import torch
-from im2mesh.common import chamfer_distance
-from im2mesh.training import BaseTrainer
-from im2mesh.utils import visualize as vis
-import numpy as np
-import torch.nn.functional as F
-import scipy.ndimage
 
-from im2mesh.dmc.utils.util import gaussian_kernel, offset_to_normal
+import numpy as np
+import scipy.ndimage
+import torch
+import torch.nn.functional as F
+from tqdm import trange
+
 from im2mesh.dmc.ops.curvature_constraint import CurvatureConstraint
 from im2mesh.dmc.ops.occupancy_connectivity import OccupancyConnectivity
 from im2mesh.dmc.ops.point_triangle_distance import PointTriangleDistance
 from im2mesh.dmc.ops.table import get_accept_topology
+from im2mesh.dmc.utils.util import gaussian_kernel
+from im2mesh.training import BaseTrainer
+from im2mesh.utils import visualize as vis
 
 
 class Trainer(BaseTrainer):
     def __init__(self, model, optimizer, device=None, input_type='pointcloud',
-                 vis_dir=None, num_voxels=16, weight_distance=5.0, weight_prior_pos=0.2, weight_prior=10.0, weight_smoothness=3.0, weight_curvature=3.0):
+                 vis_dir=None, num_voxels=16, weight_distance=5.0, weight_prior_pos=0.2, weight_prior=10.0,
+                 weight_smoothness=3.0, weight_curvature=3.0):
         self.model = model
         self.optimizer = optimizer
         self.device = device
@@ -26,12 +27,12 @@ class Trainer(BaseTrainer):
         if vis_dir is not None and not os.path.exists(vis_dir):
             os.makedirs(vis_dir)
 
-        self.num_cells = num_voxels # - 1
+        self.num_cells = num_voxels  # - 1
         self.len_cell = 1.0
 
-        self.x_grids = np.arange(0, self.num_cells+1, self.len_cell)
-        self.y_grids = np.arange(0, self.num_cells+1, self.len_cell)
-        self.z_grids = np.arange(0, self.num_cells+1, self.len_cell)
+        self.x_grids = np.arange(0, self.num_cells + 1, self.len_cell)
+        self.y_grids = np.arange(0, self.num_cells + 1, self.len_cell)
+        self.z_grids = np.arange(0, self.num_cells + 1, self.len_cell)
         self.distanceModule = PointTriangleDistance()
         self.curvatureLoss = CurvatureConstraint()
         self.occupancyConnectivity = OccupancyConnectivity()
@@ -39,7 +40,7 @@ class Trainer(BaseTrainer):
         self.acceptTopology = torch.LongTensor(
             get_accept_topology()).to(device)
         flip_indices = torch.arange(
-            self.acceptTopology.size()[0]-1, -1, -1).long()
+            self.acceptTopology.size()[0] - 1, -1, -1).long()
         self.acceptTopologyWithFlip = torch.cat([
             self.acceptTopology, 255 - self.acceptTopology[flip_indices]], dim=0)
 
@@ -52,14 +53,14 @@ class Trainer(BaseTrainer):
 
         tmp_ = np.zeros((W, H, D))
         tmp_[0, :, :] = 1
-        tmp_[W-1, :, :] = 1
+        tmp_[W - 1, :, :] = 1
         tmp_[:, :, 0] = 1
-        tmp_[:, :, D-1] = 1
+        tmp_[:, :, D - 1] = 1
         tmp_[:, 0, :] = 1
-        tmp_[:, H-1, :] = 1
+        tmp_[:, H - 1, :] = 1
         kern3 = gaussian_kernel(3)
         neg_weight = scipy.ndimage.filters.convolve(tmp_, kern3)
-        neg_weight = neg_weight/np.max(neg_weight)
+        neg_weight = neg_weight / np.max(neg_weight)
         self.neg_weight = torch.from_numpy(neg_weight.astype(np.float32)).to(device)
         self.one = torch.ones(1, requires_grad=True).to(device)
         self.weight_distance = weight_distance
@@ -68,7 +69,6 @@ class Trainer(BaseTrainer):
         self.weight_smoothness = weight_smoothness
         self.weight_curvature = weight_curvature
 
-                
     def train_step(self, data):
         self.model.train()
 
@@ -79,7 +79,7 @@ class Trainer(BaseTrainer):
         pointcloud = self.num_cells * (pointcloud / 1.2 + 0.5)
 
         offset, topology, occupancy = self.model(inputs)
-        
+
         loss, loss_stages = self.loss_train(
             offset, topology, pointcloud, occupancy)
 
@@ -125,7 +125,7 @@ class Trainer(BaseTrainer):
 
         with torch.no_grad():
             offset, topology, occupancy = self.model(inputs_norm)
-        
+
         occupancy = occupancy.view(batch_size, *shape)
         voxels_out = (occupancy >= 0.5).cpu().numpy()
 
@@ -135,8 +135,6 @@ class Trainer(BaseTrainer):
                 inputs[i].cpu(), self.input_type, input_img_path)
             vis.visualize_voxels(
                 voxels_out[i], os.path.join(self.vis_dir, '%03d.png' % i))
-
-
 
     def loss_train(self, offset, topology, pts, occupancy):
         """Compute the losses given a batch of point cloud and the predicted
@@ -167,11 +165,10 @@ class Trainer(BaseTrainer):
             if i == 0:
                 loss_stages.append(loss.item() - sum(loss_stages))
 
-        loss = loss/batchsize
+        loss = loss / batchsize
 
         return loss, loss_stages
-  
-  
+
     def loss_eval(self, offset, topology, pts):
         """Compute the point to mesh loss during validation phase"""
         loss = self.loss_point_to_mesh(offset, topology, pts, 'val')
@@ -184,7 +181,7 @@ class Trainer(BaseTrainer):
         dis_sub = self.distanceModule(offset, pts)
 
         # dual topologies share the same point-to-triangle distance
-        flip_indices = torch.arange(len(self.acceptTopology)-1, -1, -1).long()
+        flip_indices = torch.arange(len(self.acceptTopology) - 1, -1, -1).long()
         dis_accepted = torch.cat([dis_sub, dis_sub[:, flip_indices]], dim=1)
         topology_accepted = topology[:, self.acceptTopologyWithFlip]
 
@@ -195,7 +192,7 @@ class Trainer(BaseTrainer):
 
         # compute the expected loss
         loss = torch.sum(
-            topology_accepted.mul(dis_accepted)) / (self.num_cells**3)
+            topology_accepted.mul(dis_accepted)) / (self.num_cells ** 3)
 
         if phase == 'train':
             loss = loss * self.weight_distance
@@ -218,13 +215,13 @@ class Trainer(BaseTrainer):
         sorted_cube, _ = torch.sort(
             occupancy.data.view(-1), 0, descending=True)
         # check the largest 1/30 value
-        adaptive_weight = 1 - torch.mean(sorted_cube[0:int(sorted_cube.size()[0]/30)])
+        adaptive_weight = 1 - torch.mean(sorted_cube[0:int(sorted_cube.size()[0] / 30)])
 
         # loss on a subvolume inside the cube, where the weight is assigned
         # adaptively w.r.t. the current occupancy status 
         loss_occupied = self.weight_prior_pos * adaptive_weight * \
-                (1-torch.mean(occupancy[int(0.2*W):int(0.8*W), 
-                int(0.2*H):int(0.8*H), int(0.2*D):int(0.8*D)]))
+                        (1 - torch.mean(occupancy[int(0.2 * W):int(0.8 * W),
+                                        int(0.2 * H):int(0.8 * H), int(0.2 * D):int(0.8 * D)]))
 
         return (loss_free + loss_occupied) * self.weight_prior
 
@@ -233,17 +230,15 @@ class Trainer(BaseTrainer):
         variables
         """
         loss = (
-            self.occupancyConnectivity(occupancy) / (self.num_cells**3)
-            * self.weight_smoothness
+                self.occupancyConnectivity(occupancy) / (self.num_cells ** 3)
+                * self.weight_smoothness
         )
-        return  loss
+        return loss
 
     def loss_on_curvature(self, offset, topology):
         """Compute the curvature loss by measuring the smoothness of the
         predicted mesh geometry
         """
         topology_accepted = topology[:, self.acceptTopologyWithFlip]
-        return self.weight_curvature*self.curvatureLoss(offset, \
-                F.softmax(topology_accepted, dim=1)) / (self.num_cells**3)
-
-
+        return self.weight_curvature * self.curvatureLoss(offset, \
+                                                          F.softmax(topology_accepted, dim=1)) / (self.num_cells ** 3)

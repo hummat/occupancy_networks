@@ -1,4 +1,5 @@
 import numpy as np
+
 from .triangle_hash import TriangleHash as _TriangleHash
 
 
@@ -37,8 +38,7 @@ class MeshIntersector:
 
         # cull points outside of the axis aligned bounding box
         # this avoids running ray tests unless points are close
-        inside_aabb = np.all(
-            (0 <= points) & (points <= self.resolution), axis=1)
+        inside_aabb = np.all((0 <= points) & (points <= self.resolution), axis=1)
         if not inside_aabb.any():
             return contains
 
@@ -52,8 +52,7 @@ class MeshIntersector:
         triangles_intersect = self._triangles[tri_indices]
         points_intersect = points[points_indices]
 
-        depth_intersect, abs_n_2 = self.compute_intersection_depth(
-            points_intersect, triangles_intersect)
+        depth_intersect, abs_n_2 = self.compute_intersection_depth(points_intersect, triangles_intersect)
 
         # Count number of intersections in both directions
         smaller_depth = depth_intersect >= points_intersect[:, 2] * abs_n_2
@@ -63,7 +62,7 @@ class MeshIntersector:
 
         nintersect0 = np.bincount(points_indices_0, minlength=points.shape[0])
         nintersect1 = np.bincount(points_indices_1, minlength=points.shape[0])
-        
+
         # Check if point contained in mesh
         contains1 = (np.mod(nintersect0, 2) == 1)
         contains2 = (np.mod(nintersect1, 2) == 1)
@@ -91,7 +90,7 @@ class MeshIntersector:
         abs_n_2 = np.abs(n_2)
 
         mask = (abs_n_2 != 0)
-    
+
         depth_intersect = np.full(points.shape[0], np.nan)
         depth_intersect[mask] = \
             t1_2[mask] * abs_n_2[mask] + alpha[mask] * s_n_2[mask]
@@ -133,7 +132,7 @@ class TriangleIntersector2d:
         y = points - triangles[:, 2]
 
         detA = A[:, 0, 0] * A[:, 1, 1] - A[:, 0, 1] * A[:, 1, 0]
-        
+
         mask = (np.abs(detA) != 0.)
         A = A[mask]
         y = y[mask]
@@ -147,8 +146,7 @@ class TriangleIntersector2d:
 
         sum_uv = u + v
         contains[mask] = (
-            (0 < u) & (u < abs_detA) & (0 < v) & (v < abs_detA)
-            & (0 < sum_uv) & (sum_uv < abs_detA)
+                (0 < u) & (u < abs_detA) & (0 < v) & (v < abs_detA)
+                & (0 < sum_uv) & (sum_uv < abs_detA)
         )
         return contains
-

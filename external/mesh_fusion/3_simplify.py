@@ -1,6 +1,7 @@
-import os
 import argparse
 import ntpath
+import os
+
 import common
 
 
@@ -19,7 +20,8 @@ class Simplification:
         self.simplification_script = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), 'simplification.mlx')
 
-    def get_parser(self):
+    @staticmethod
+    def get_parser():
         """
         Get parser of tool.
 
@@ -37,7 +39,8 @@ class Simplification:
 
         return parser
 
-    def read_directory(self, directory):
+    @staticmethod
+    def read_directory(directory):
         """
         Read directory.
 

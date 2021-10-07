@@ -1,18 +1,17 @@
 import argparse
 # import numpy as np
 import os
-from tqdm import tqdm
+
 import pandas as pd
-import trimesh
 import torch
+import trimesh
+from tqdm import tqdm
+
 from im2mesh import config, data
 from im2mesh.eval import MeshEvaluator
 from im2mesh.utils.io import load_pointcloud
 
-
-parser = argparse.ArgumentParser(
-    description='Evaluate mesh algorithms.'
-)
+parser = argparse.ArgumentParser(description='Evaluate mesh algorithms.')
 parser.add_argument('config', type=str, help='Path to config file.')
 parser.add_argument('--no-cuda', action='store_true', help='Do not use cuda.')
 parser.add_argument('--eval_input', action='store_true',
@@ -35,7 +34,7 @@ else:
 
 # Dataset
 points_field = data.PointsField(
-    cfg['data']['points_iou_file'], 
+    cfg['data']['points_iou_file'],
     unpackbits=cfg['data']['points_unpackbits'],
 )
 pointcloud_field = data.PointCloudField(
@@ -85,7 +84,7 @@ for it, data in enumerate(tqdm(test_loader)):
         model_dict = dataset.get_model_dict(idx)
     except AttributeError:
         model_dict = {'model': str(idx), 'category': 'n/a'}
-    
+
     modelname = model_dict['model']
     category_id = model_dict['category']
 
@@ -140,7 +139,7 @@ for it, data in enumerate(tqdm(test_loader)):
                 eval_dict[k + ' (pcl)'] = v
         else:
             print('Warning: pointcloud does not exist: %s'
-                    % pointcloud_file)
+                  % pointcloud_file)
 
 # Create pandas dataframe and save
 eval_df = pd.DataFrame(eval_dicts)

@@ -225,7 +225,7 @@ class CBatchNorm1d(nn.Module):
 
     def forward(self, x, c):
         assert(x.size(0) == c.size(0))
-        assert(c.size(1) == self.c_dim)
+        assert(c.size(1) == self.c_dim), f"Dims are {c.size(1)} and {self.c_dim}."
 
         # c is assumed to be of size batch_size x c_dim x T
         if len(c.size()) == 2:

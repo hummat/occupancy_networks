@@ -1,0 +1,1 @@
+conda activate mesh_funcspace
