@@ -108,8 +108,7 @@ class Generator3D(object):
             values = self.eval_points(pointsf, z, c, **kwargs).cpu().numpy()
             value_grid = values.reshape(nx, nx, nx)
         else:
-            mesh_extractor = MISE(
-                self.resolution0, self.upsampling_steps, threshold)
+            mesh_extractor = MISE(self.resolution0, self.upsampling_steps, threshold)
 
             points = mesh_extractor.query()
 
@@ -120,8 +119,7 @@ class Generator3D(object):
                 pointsf = pointsf / mesh_extractor.resolution
                 pointsf = box_size * (pointsf - 0.5)
                 # Evaluate model and update
-                values = self.eval_points(
-                    pointsf, z, c, **kwargs).cpu().numpy()
+                values = self.eval_points(pointsf, z, c, **kwargs).cpu().numpy()
                 values = values.astype(np.float64)
                 mesh_extractor.update(points, values)
                 points = mesh_extractor.query()

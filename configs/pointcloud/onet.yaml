@@ -2,7 +2,7 @@ method: onet
 data:
   input_type: pointcloud
   classes: ["02876657", "02880940", "02946921", "03797390"]
-  path: data/ShapeNet
+  path: data/ShapeNet/extra
   pointcloud_n: 300
   pointcloud_noise: 0.005
   points_subsample: 2048
@@ -15,7 +15,7 @@ model:
   c_dim: 512 
   z_dim: 0
 training:
-  out_dir:  out/pointcloud/onet
+  out_dir: out/pointcloud/onet
   batch_size: 32
   model_selection_metric: iou
   model_selection_mode: maximize
