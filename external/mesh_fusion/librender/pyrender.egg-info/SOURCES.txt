@@ -1,0 +1,7 @@
+offscreen.cpp
+pyrender.pyx
+setup.py
+pyrender.egg-info/PKG-INFO
+pyrender.egg-info/SOURCES.txt
+pyrender.egg-info/dependency_links.txt
+pyrender.egg-info/top_level.txt
