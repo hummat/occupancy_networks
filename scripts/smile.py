@@ -124,6 +124,7 @@ def from_pointcloud(visualize=False):
     # checkpoint_io.load(os.path.join(path_prefix, cfg['test']['model_file']))
     checkpoint_io.load(cfg['test']['model_file'])
     model.eval()
+    print(model)
 
     generator = config.get_generator(model, cfg, device)
     mesh = generator.generate_mesh(data, return_stats=False)
