@@ -1,4 +1,6 @@
 inherit_from: configs/img/onet.yaml
+data:
+  path: data/ShapeNet/core
 test:
   model_file: https://s3.eu-central-1.amazonaws.com/avg-projects/occupancy_networks/models/onet_img2mesh_3-f786b04a.pt
 generation:
