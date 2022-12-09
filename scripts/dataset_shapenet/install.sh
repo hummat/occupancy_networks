@@ -45,20 +45,17 @@ reorganize_choy2016() {
 export -f reorganize_choy2016
 
 # Make output directories
-# shellcheck disable=SC2153
 mkdir -p "$OUTPUT_PATH"
 
 # Run build
 for c in "${CLASSES[@]}"; do
   echo "Parsing class $c"
-  # shellcheck disable=SC2153
   BUILD_PATH_C="$BUILD_PATH"/$c
   OUTPUT_PATH_C=$OUTPUT_PATH/$c
   CHOY2016_IMG_PATH_C="$CHOY2016_PATH/ShapeNetRendering/$c"
   CHOY2016_VOX_PATH_C="$CHOY2016_PATH/ShapeNetVox32/$c"
   mkdir -p "$OUTPUT_PATH_C"
 
-  # shellcheck disable=SC2012
   ls "$CHOY2016_VOX_PATH_C" | parallel -P "$NPROC" --timeout "$TIMEOUT" \
     reorganize_choy2016 "$CHOY2016_IMG_PATH_C" "$CHOY2016_VOX_PATH_C" "$BUILD_PATH_C" "$OUTPUT_PATH_C" {}
 

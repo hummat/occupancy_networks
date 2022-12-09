@@ -10,7 +10,7 @@ import trimesh
 
 # TODO: do this better
 sys.path.append('..')
-from im2mesh.utils import binvox_rw, voxels
+from im2mesh.utils import binvox_rw, voxels, generate_random_basis
 from im2mesh.utils.libmesh import check_mesh_contains
 
 parser = argparse.ArgumentParser('Sample a watertight mesh.')
@@ -106,7 +106,7 @@ def process_path(in_path, args):
             R = trimesh.transformations.rotation_matrix(angle, [0, 1, 0])
             mesh.apply_transform(R)
 
-    # Expert various modalities
+    # Export various modalities
     if args.pointcloud_folder is not None:
         export_pointcloud(mesh, modelname, loc, scale, args)
 
@@ -185,7 +185,8 @@ def export_points(mesh, modelname, loc, scale, args):
     points_uniform = boxsize * (points_uniform - 0.5)
     points_surface = mesh.sample(n_points_surface)
     points_surface += args.points_sigma * np.random.randn(n_points_surface, 3)
-    points = np.concatenate([points_uniform, points_surface], axis=0)
+    points_sphere = generate_random_basis(n_points_uniform, radius=boxsize, seed=None)
+    points = np.concatenate([points_uniform, points_surface, points_sphere], axis=0)
 
     occupancies = check_mesh_contains(mesh, points)
 

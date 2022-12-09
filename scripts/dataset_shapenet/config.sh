@@ -1,48 +1,108 @@
 ROOT=..
 
-export MESHFUSION_PATH=$ROOT/external/mesh_fusion
+export MESHFUSION_PATH="$ROOT/external/mesh_fusion"
 export HDF5_USE_FILE_LOCKING=FALSE # Workaround for NFS mounts
 
-# shellcheck disable=SC2034
-INPUT_PATH=$ROOT/data/external/ShapeNetCore.v1
-# shellcheck disable=SC2034
-CHOY2016_PATH=$ROOT/data/external/Choy2016
-# shellcheck disable=SC2034
-BUILD_PATH=$ROOT/data/ShapeNet.build
-# shellcheck disable=SC2034
-OUTPUT_PATH=$ROOT/data/ShapeNet
+SHAPENET_VERSION=v2
+INPUT_PATH="$ROOT/data/external/ShapeNetCore.$SHAPENET_VERSION"
+CHOY2016_PATH="$ROOT/data/external/Choy2016"
+BUILD_PATH="$ROOT/data/ShapeNetCore.$SHAPENET_VERSION.build"
+OUTPUT_PATH="$ROOT/data/ShapeNet"
 
-# shellcheck disable=SC2034
 NPROC=16
-# shellcheck disable=SC2034
 TIMEOUT=180
-# shellcheck disable=SC2034
 N_VAL=100
-# shellcheck disable=SC2034
 N_TEST=100
-# shellcheck disable=SC2034
 N_AUG=50
 
-# shellcheck disable=SC2034
-declare -a CLASSES=(
-  #  03001627
-  #  02958343
-  #  04256520
-  02691156
-  #  03636649
-  #  04401088
-  #  04530566
-  #  03691459
-  #  02933112
-  #  04379243
-  #  03211117
-  #  02828884
-  #  04090263
-  #  02876657 # bottle
-  #  02880940  # bowl
-  #  02946921  # can
-  #  03797390  # mug
-)
+if [ "$SHAPENET_VERSION" = "v1" ]
+then
+  MODEL_NAME=model.obj
+
+  declare -a CLASSES=(
+    03001627
+    02958343
+    04256520
+    02691156
+    03636649
+    04401088
+    04530566
+    03691459
+    02933112
+    04379243
+    03211117
+    02828884
+    04090263
+    02876657 # bottle
+    02880940 # bowl
+    02946921 # can
+    03797390 # mug
+  )
+elif [ "$SHAPENET_VERSION" = "v2" ]
+then
+  MODEL_NAME=models/model_normalized.obj
+
+  declare -a CLASSES=(
+    02691156
+    02747177
+    # 02773838
+    02801938
+    02808440
+    02818832
+    02828884
+    02843684
+    02871439
+    02876657
+    02880940
+    02924116
+    02933112
+    02942699
+    02946921
+    02954340
+    02958343
+    02992529
+    03001627
+    03046257
+    03085013
+    03207941
+    03211117
+    03261776
+    03325088
+    03337140
+    03467517
+    03513137
+    03593526
+    03624134
+    # 03636649
+    03642806
+    03691459
+    03710193
+    03759954
+    03761084
+    03790512
+    03797390
+    03928116
+    03938244
+    03948459
+    03991062
+    04004475
+    04074963
+    04090263
+    04099429
+    04225987
+    04256520
+    04330267
+    04379243
+    04401088
+    04460130
+    04468005
+    04530566
+    04554684
+  )
+else
+  echo "Unknown ShapeNet version $SHAPENET_VERSION"
+  exit 1
+fi
 
 # Utility functions
 lsfilter() {

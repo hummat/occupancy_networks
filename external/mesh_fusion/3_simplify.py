@@ -1,6 +1,7 @@
 import argparse
 import ntpath
 import os
+from multiprocessing import Pool
 
 import common
 
@@ -17,8 +18,7 @@ class Simplification:
 
         parser = self.get_parser()
         self.options = parser.parse_args()
-        self.simplification_script = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), 'simplification.mlx')
+        self.simplification_script = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'simplification.mlx')
 
     @staticmethod
     def get_parser():
@@ -33,9 +33,12 @@ class Simplification:
         input_group.add_argument('--in_dir', type=str,
                                  help='Path to input directory.')
         input_group.add_argument('--in_file', type=str,
-                                 help='Path to input directory.')
+                                 help='Path to input file.')
         parser.add_argument('--out_dir', type=str,
                             help='Path to output directory; files within are overwritten!')
+        parser.add_argument('--n_proc', type=int, default=0,
+                            help='Number of processes to run in parallel'
+                                 '(0 means sequential execution).')
 
         return parser
 
@@ -72,12 +75,15 @@ class Simplification:
         common.makedir(self.options.out_dir)
         files = self.get_in_files()
 
-        for filepath in files:
-            os.system('meshlabserver -i %s -o %s -s %s' % (
-                filepath,
-                os.path.join(self.options.out_dir, ntpath.basename(filepath)),
-                self.simplification_script
-            ))
+        if self.options.n_proc == 0:
+            for filepath in files:
+                self.run_file(filepath)
+        else:
+            with Pool(self.options.n_proc) as p:
+                p.map(self.run_file, files)
+
+    def run_file(self, filepath):
+        os.system('meshlabserver -i %s -o %s -s %s' % (filepath, os.path.join(self.options.out_dir, ntpath.basename(filepath)), self.simplification_script))
 
 
 if __name__ == '__main__':
