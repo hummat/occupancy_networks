@@ -3,11 +3,11 @@ ROOT=..
 export MESHFUSION_PATH="$ROOT/external/mesh_fusion"
 export HDF5_USE_FILE_LOCKING=FALSE # Workaround for NFS mounts
 
-SHAPENET_VERSION=v2
+SHAPENET_VERSION=v1
 INPUT_PATH="$ROOT/data/external/ShapeNetCore.$SHAPENET_VERSION"
 CHOY2016_PATH="$ROOT/data/external/Choy2016"
 BUILD_PATH="$ROOT/data/ShapeNetCore.$SHAPENET_VERSION.build"
-OUTPUT_PATH="$ROOT/data/ShapeNet"
+OUTPUT_PATH="$ROOT/data/occ"
 
 NPROC=16
 TIMEOUT=180
@@ -20,23 +20,23 @@ then
   MODEL_NAME=model.obj
 
   declare -a CLASSES=(
-    03001627
-    02958343
-    04256520
-    02691156
-    03636649
-    04401088
-    04530566
-    03691459
-    02933112
-    04379243
-    03211117
-    02828884
-    04090263
-    02876657 # bottle
+    # 02691156 # airplane
+    # 02828884 # bench
+    # 02876657 # bottle
     02880940 # bowl
-    02946921 # can
-    03797390 # mug
+    # 02933112 # cabinet
+    # 02946921 # can
+    # 02958343 # cap
+    # 03001627 # chair
+    # 03211117 # display
+    # 03636649 # lamp
+    # 03691459 # speaker
+    # 03797390 # mug
+    # 04090263 # rifle
+    # 04256520 # sofa
+    # 04379243 # tool
+    # 04401088 # table
+    # 04530566 # watercraft
   )
 elif [ "$SHAPENET_VERSION" = "v2" ]
 then
@@ -44,8 +44,8 @@ then
 
   declare -a CLASSES=(
     02691156
-    02747177
-    # 02773838
+    02747177 # backpack
+    02773838
     02801938
     02808440
     02818832
@@ -73,7 +73,7 @@ then
     03513137
     03593526
     03624134
-    # 03636649
+    03636649
     03642806
     03691459
     03710193
@@ -106,13 +106,15 @@ fi
 
 # Utility functions
 lsfilter() {
-  folder=$1
-  other_folder=$2
-  ext=$3
+  folder="$1"
+  other_folder="$2"
+  ext="$3"
 
-  for f in "$folder"/*; do
+  for f in "$folder"/*
+  do
     filename=$(basename "$f")
-    if [ ! -f "$other_folder/$filename$ext" ] && [ ! -d "$other_folder/$filename$ext" ]; then
+    if [ ! -f "$other_folder/$filename$ext" ] && [ ! -d "$other_folder/$filename$ext" ]
+    then
       echo "$filename"
     fi
   done

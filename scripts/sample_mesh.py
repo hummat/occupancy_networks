@@ -3,7 +3,9 @@ import glob
 import os
 import sys
 from functools import partial
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
+from joblib import Parallel, delayed
+import gc
 
 import numpy as np
 import trimesh
@@ -67,17 +69,29 @@ parser.add_argument('--packbits', action='store_true',
 
 def main(args):
     input_files = glob.glob(os.path.join(args.in_folder, '*.off'))
-    if args.n_proc != 0:
-        with Pool(args.n_proc) as p:
-            p.map(partial(process_path, args=args), input_files)
+    if args.n_proc > 0 and len(input_files) > cpu_count():
+        Parallel(n_jobs=args.n_proc)(delayed(process_path)(path, args) for path in input_files)
+        # with Pool(args.n_proc) as p:
+        #     p.map(partial(process_path, args=args), input_files)
     else:
         for p in input_files:
             process_path(p, args)
+    # gc.collect()
 
 
 def process_path(in_path, args):
     in_file = os.path.basename(in_path)
     modelname = os.path.splitext(in_file)[0]
+
+    pointlcoud_exists = args.pointcloud_folder is None or os.path.exists(os.path.join(args.pointcloud_folder, modelname + '.npz'))
+    voxles_exists = args.voxels_folder is None or os.path.exists(os.path.join(args.voxels_folder, modelname + '.binvox'))
+    points_exists = args.points_folder is None or os.path.exists(os.path.join(args.points_folder, modelname + '.npz'))
+    mesh_exists = args.mesh_folder is None or os.path.exists(os.path.join(args.mesh_folder, modelname + '.off'))
+
+    if not args.overwrite and pointlcoud_exists and voxles_exists and points_exists and mesh_exists:
+        print('Skipping %s' % modelname)
+        return
+
     mesh = trimesh.load(in_path, process=False)
 
     # Determine bounding box
@@ -90,6 +104,7 @@ def process_path(in_path, args):
             in_path_tmp = os.path.join(args.bbox_in_folder, modelname + '.off')
             mesh_tmp = trimesh.load(in_path_tmp, process=False)
             bbox = mesh_tmp.bounding_box.bounds
+            # del mesh_tmp
         else:
             bbox = mesh.bounding_box.bounds
 
@@ -119,6 +134,9 @@ def process_path(in_path, args):
     if args.mesh_folder is not None:
         export_mesh(mesh, modelname, loc, scale, args)
 
+    # del mesh
+    # gc.collect()
+
 
 def export_pointcloud(mesh, modelname, loc, scale, args):
     filename = os.path.join(args.pointcloud_folder, modelname + '.npz')
@@ -137,6 +155,8 @@ def export_pointcloud(mesh, modelname, loc, scale, args):
 
     points = points.astype(dtype)
     normals = normals.astype(dtype)
+
+    # trimesh.PointCloud(points).show()
 
     print('Writing pointcloud: %s' % filename)
     np.savez(filename, points=points, normals=normals, loc=loc, scale=scale)

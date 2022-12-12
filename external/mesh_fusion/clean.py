@@ -1,14 +1,14 @@
 import argparse
 import ntpath
 import os
-from multiprocessing import Pool
+import joblib
 
 import common
 
 
-class Simplification:
+class RunMeshLabServerCommand:
     """
-    Perform simplification of watertight meshes.
+    Perform MeshLab Server operation on inputs.
     """
 
     def __init__(self):
@@ -18,7 +18,7 @@ class Simplification:
 
         parser = self.get_parser()
         self.options = parser.parse_args()
-        self.simplification_script = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'simplification.mlx')
+        self.simplification_script = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.options.script)
 
     @staticmethod
     def get_parser():
@@ -34,6 +34,8 @@ class Simplification:
                                  help='Path to input directory.')
         input_group.add_argument('--in_file', type=str,
                                  help='Path to input file.')
+        parser.add_argument('--script', type=str, required=True,
+                            help='Name of meshlabserver script.')
         parser.add_argument('--out_dir', type=str,
                             help='Path to output directory; files within are overwritten!')
         parser.add_argument('--n_proc', type=int, default=0,
@@ -79,13 +81,12 @@ class Simplification:
             for filepath in files:
                 self.run_file(filepath)
         else:
-            with Pool(self.options.n_proc) as p:
-                p.map(self.run_file, files)
+            joblib.Parallel(n_jobs=self.options.n_proc)(joblib.delayed(self.run_file)(filepath) for filepath in files)
 
     def run_file(self, filepath):
         os.system('meshlabserver -i %s -o %s -s %s' % (filepath, os.path.join(self.options.out_dir, ntpath.basename(filepath)), self.simplification_script))
 
 
 if __name__ == '__main__':
-    app = Simplification()
+    app = RunMeshLabServerCommand()
     app.run()
