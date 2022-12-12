@@ -1,8 +1,8 @@
 <!DOCTYPE FilterScript>
 <FilterScript>
  <filter name="Select small disconnected component">
-  <Param isxmlparam="0" type="RichFloat" description="Small component ratio" value="0.99" name="NbFaceRatio" tooltip="This ratio (between 0 and 1) defines the meaning of &lt;i>small&lt;/i> as the threshold ratio between the number of facesof the largest component and the other ones. A larger value will select more components."/>
-  <Param isxmlparam="0" type="RichBool" description="Select only non closed components" value="false" name="NonClosedOnly" tooltip=""/>
+  <Param type="RichFloat" value="0.1" name="NbFaceRatio"/>
+  <Param type="RichBool" value="false" name="NonClosedOnly"/>
  </filter>
  <filter name="Delete Selected Faces and Vertices"/>
 </FilterScript>

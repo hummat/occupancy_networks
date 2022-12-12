@@ -1,10 +1,5 @@
 <!DOCTYPE FilterScript>
 <FilterScript>
- <filter name="Select small disconnected component">
-  <Param isxmlparam="0" type="RichFloat" description="Small component ratio" value="0.99" name="NbFaceRatio" tooltip="This ratio (between 0 and 1) defines the meaning of &lt;i>small&lt;/i> as the threshold ratio between the number of facesof the largest component and the other ones. A larger value will select more components."/>
-  <Param isxmlparam="0" type="RichBool" description="Select only non closed components" value="false" name="NonClosedOnly" tooltip=""/>
- </filter>
- <filter name="Delete Selected Faces and Vertices"/>
  <filter name="Simplification: Quadric Edge Collapse Decimation">
   <Param isxmlparam="0" type="RichInt" description="Target number of faces" value="100000" name="TargetFaceNum" tooltip="The desired final number of faces."/>
   <Param isxmlparam="0" type="RichFloat" description="Percentage reduction (0..1)" value="0.05" name="TargetPerc" tooltip="If non zero, this parameter specifies the desired final size of the mesh as a percentage of the initial size."/>

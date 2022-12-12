@@ -34,8 +34,8 @@ class RunMeshLabServerCommand:
                                  help='Path to input directory.')
         input_group.add_argument('--in_file', type=str,
                                  help='Path to input file.')
-        input_group.add_argument('--script', type=str,
-                                 help='Name of meshlabserver script.')
+        parser.add_argument('--script', type=str, required=True,
+                            help='Name of meshlabserver script.')
         parser.add_argument('--out_dir', type=str,
                             help='Path to output directory; files within are overwritten!')
         parser.add_argument('--n_proc', type=int, default=0,
@@ -88,5 +88,5 @@ class RunMeshLabServerCommand:
 
 
 if __name__ == '__main__':
-    app = Simplification()
+    app = RunMeshLabServerCommand()
     app.run()
