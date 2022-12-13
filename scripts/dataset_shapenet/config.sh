@@ -22,8 +22,8 @@ then
   declare -a CLASSES=(
     # 02691156 # airplane
     # 02828884 # bench
-    # 02876657 # bottle
-    02880940 # bowl
+    02876657 # bottle
+    # 02880940 # bowl
     # 02933112 # cabinet
     # 02946921 # can
     # 02958343 # cap
@@ -35,7 +35,7 @@ then
     # 04090263 # rifle
     # 04256520 # sofa
     # 04379243 # tool
-    # 04401088 # table
+    # 04401088 # smartphone
     # 04530566 # watercraft
   )
 elif [ "$SHAPENET_VERSION" = "v2" ]

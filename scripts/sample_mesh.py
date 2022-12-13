@@ -34,7 +34,7 @@ parser.add_argument('--bbox_in_folder', type=str,
 
 parser.add_argument('--pointcloud_folder', type=str,
                     help='Output path for point cloud.')
-parser.add_argument('--pointcloud_size', type=int, default=100000,
+parser.add_argument('--pointcloud_size', type=int, default=int(1e5),
                     help='Size of point cloud.')
 
 parser.add_argument('--voxels_folder', type=str,
@@ -44,11 +44,8 @@ parser.add_argument('--voxels_res', type=int, default=32,
 
 parser.add_argument('--points_folder', type=str,
                     help='Output path for points.')
-parser.add_argument('--points_size', type=int, default=100000,
+parser.add_argument('--points_size', type=int, default=int(1e5),
                     help='Size of points.')
-parser.add_argument('--points_uniform_ratio', type=float, default=1.,
-                    help='Ratio of points to sample uniformly'
-                         'in bounding box.')
 parser.add_argument('--points_sigma', type=float, default=0.01,
                     help='Standard deviation of gaussian noise added to points'
                          'samples on the surfaces.')
@@ -71,12 +68,9 @@ def main(args):
     input_files = glob.glob(os.path.join(args.in_folder, '*.off'))
     if args.n_proc > 0 and len(input_files) > cpu_count():
         Parallel(n_jobs=args.n_proc)(delayed(process_path)(path, args) for path in input_files)
-        # with Pool(args.n_proc) as p:
-        #     p.map(partial(process_path, args=args), input_files)
     else:
         for p in input_files:
             process_path(p, args)
-    # gc.collect()
 
 
 def process_path(in_path, args):
@@ -104,7 +98,6 @@ def process_path(in_path, args):
             in_path_tmp = os.path.join(args.bbox_in_folder, modelname + '.off')
             mesh_tmp = trimesh.load(in_path_tmp, process=False)
             bbox = mesh_tmp.bounding_box.bounds
-            # del mesh_tmp
         else:
             bbox = mesh.bounding_box.bounds
 
@@ -133,9 +126,6 @@ def process_path(in_path, args):
 
     if args.mesh_folder is not None:
         export_mesh(mesh, modelname, loc, scale, args)
-
-    # del mesh
-    # gc.collect()
 
 
 def export_pointcloud(mesh, modelname, loc, scale, args):
@@ -197,16 +187,21 @@ def export_points(mesh, modelname, loc, scale, args):
         print('Points already exist: %s' % filename)
         return
 
-    n_points_uniform = int(args.points_size * args.points_uniform_ratio)
-    n_points_surface = args.points_size - n_points_uniform
-
     boxsize = 1 + args.points_padding
-    points_uniform = np.random.rand(n_points_uniform, 3)
+    points_uniform = np.random.rand(args.points_size, 3)
     points_uniform = boxsize * (points_uniform - 0.5)
-    points_surface = mesh.sample(n_points_surface)
-    points_surface += args.points_sigma * np.random.randn(n_points_surface, 3)
-    points_sphere = generate_random_basis(n_points_uniform, radius=boxsize, seed=None)
-    points = np.concatenate([points_uniform, points_surface, points_sphere], axis=0)
+    points_surface = mesh.sample(args.points_size)
+    points_surface += args.points_sigma * np.random.randn(args.points_size, 3)
+    points_sphere_1 = generate_random_basis(args.points_size, radius=1, seed=None)
+    points_sphere_2 = generate_random_basis(args.points_size, radius=2, seed=None)
+    points_sphere_5 = generate_random_basis(args.points_size, radius=5, seed=None)
+    points_sphere_10 = generate_random_basis(args.points_size, radius=10, seed=None)
+    points = np.concatenate([points_uniform,
+                             points_surface,
+                             points_sphere_1,
+                             points_sphere_2,
+                             points_sphere_5,
+                             points_sphere_10], axis=0)
 
     occupancies = check_mesh_contains(mesh, points)
 
@@ -222,8 +217,7 @@ def export_points(mesh, modelname, loc, scale, args):
         occupancies = np.packbits(occupancies)
 
     print('Writing points: %s' % filename)
-    np.savez(filename, points=points, occupancies=occupancies,
-             loc=loc, scale=scale)
+    np.savez(filename, points=points, occupancies=occupancies, loc=loc, scale=scale)
 
 
 def export_mesh(mesh, modelname, loc, scale, args):
