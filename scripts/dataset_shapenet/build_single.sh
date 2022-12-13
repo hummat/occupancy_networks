@@ -22,7 +22,15 @@ mkdir -p "$build_path_c"/0_in \
   "$build_path_c"/4_mesh
 
 echo "Converting meshes to OFF"
-meshlabserver -i "$input_path_c/$HASH/$MODEL_NAME" -o "$build_path_c/0_in/$HASH.off"
+# meshlabserver -i "$input_path_c/$HASH/$MODEL_NAME" -o "$build_path_c/0_in/$HASH.off"
+
+python "$MESHFUSION_PATH"/3_meshlabserver.py \
+  --in_path "$input_path_c/$HASH/$MODEL_NAME" \
+  --out_path "$build_path_c/0_in/$HASH.off" \
+  --use_pymeshlab \
+  --overwrite
+
+rm "$build_path_c"/0_in/dummy.png
 
 echo "Scaling meshes"
 python "$MESHFUSION_PATH"/1_scale.py \
@@ -46,14 +54,28 @@ python "$MESHFUSION_PATH"/2_fusion.py \
   --t_dir "$build_path_c"/1_transform \
   --overwrite
 
-  echo "Clean watertight meshes"
-  python "$MESHFUSION_PATH"/clean.py \
-    --in_dir "$build_path_c"/2_watertight \
-    --out_dir "$build_path_c"/3_watertight_clean \
-    --overwrite
+echo "Clean watertight meshes"
+# python "$MESHFUSION_PATH"/clean.py \
+#   --in_dir "$build_path_c"/2_watertight \
+#   --out_dir "$build_path_c"/3_watertight_clean \
+#   --overwrite
+
+python "$MESHFUSION_PATH"/3_meshlabserver.py \
+  --in_path "$build_path_c/2_watertight/$HASH.off" \
+  --out_path "$build_path_c/3_watertight_clean/$HASH.off" \
+  --script_path "$MESHFUSION_PATH"/remove.mlx \
+  --use_pymeshlab \
+  --overwrite
 
 echo "Simplify watertight meshes"
-  meshlabserver -i "$build_path_c/3_watertight_clean/$HASH.off" -o "$build_path_c/3_watertight_clean_simple/$HASH.off" -s "$MESHFUSION_PATH"/simplify.mlx
+# meshlabserver -i "$build_path_c/3_watertight_clean/$HASH.off" -o "$build_path_c/3_watertight_clean_simple/$HASH.off" -s "$MESHFUSION_PATH"/simplify.mlx
+
+python "$MESHFUSION_PATH"/3_meshlabserver.py \
+  --in_path "$build_path_c/3_watertight_clean/$HASH.off" \
+  --out_path "$build_path_c/3_watertight_clean_simple/$HASH.off" \
+  --script_path "$MESHFUSION_PATH"/simplify.mlx \
+  --use_pymeshlab \
+  --overwrite
 
 echo "Process watertight meshes"
 python sample_mesh.py "$build_path_c"/3_watertight_clean_simple \

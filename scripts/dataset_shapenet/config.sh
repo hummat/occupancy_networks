@@ -18,12 +18,13 @@ N_AUG=50
 if [ "$SHAPENET_VERSION" = "v1" ]
 then
   MODEL_NAME=model.obj
+  OUT_NAME_POS=-2
 
   declare -a CLASSES=(
     # 02691156 # airplane
     # 02828884 # bench
-    02876657 # bottle
-    # 02880940 # bowl
+    # 02876657 # bottle
+    02880940 # bowl
     # 02933112 # cabinet
     # 02946921 # can
     # 02958343 # cap
@@ -41,6 +42,7 @@ then
 elif [ "$SHAPENET_VERSION" = "v2" ]
 then
   MODEL_NAME=models/model_normalized.obj
+  OUT_NAME_POS=-3
 
   declare -a CLASSES=(
     02691156

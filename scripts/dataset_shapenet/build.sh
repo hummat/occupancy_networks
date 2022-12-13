@@ -21,8 +21,18 @@ do
     "$build_path_c"/4_mesh
 
   echo "Converting meshes to OFF"
-  lsfilter "$input_path_c" "$build_path_c"/0_in .off | parallel -P "$NPROC" --timeout "$TIMEOUT" \
-    meshlabserver -i "$input_path_c"/{}/"$MODEL_NAME" -o "$build_path_c"/0_in/{}.off
+  # lsfilter "$input_path_c" "$build_path_c"/0_in .off | parallel -P "$NPROC" --timeout "$TIMEOUT" \
+  #   meshlabserver -i "$input_path_c"/{}/"$MODEL_NAME" -o "$build_path_c"/0_in/{}.off
+
+  python "$MESHFUSION_PATH"/3_meshlabserver.py \
+    --in_dir "$input_path_c/*/$MODEL_NAME" \
+    --out_dir "$build_path_c"/0_in \
+    --out_format off \
+    --out_name_pos "$OUT_NAME_POS" \
+    --n_proc "$NPROC" \
+    --use_pymeshlab
+
+  rm "$build_path_c"/0_in/dummy.png
 
   echo "Scale meshes"
   python "$MESHFUSION_PATH"/1_scale.py \
@@ -47,14 +57,28 @@ do
     --t_dir "$build_path_c"/1_transform
 
   echo "Clean watertight meshes"
-  python "$MESHFUSION_PATH"/clean.py \
-    --n_proc "$NPROC" \
+  # python "$MESHFUSION_PATH"/clean.py \
+  #   --n_proc "$NPROC" \
+  #   --in_dir "$build_path_c"/2_watertight \
+  #   --out_dir "$build_path_c"/3_watertight_clean
+
+  python "$MESHFUSION_PATH"/3_meshlabserver.py \
     --in_dir "$build_path_c"/2_watertight \
-    --out_dir "$build_path_c"/3_watertight_clean
+    --out_dir "$build_path_c"/3_watertight_clean \
+    --script_path "$MESHFUSION_PATH"/remove.mlx \
+    --n_proc "$NPROC" \
+    --use_pymeshlab
 
   echo "Simplify watertight meshes"
-  ls "$build_path_c"/3_watertight_clean | parallel -P "$NPROC" --timeout "$TIMEOUT" \
-    meshlabserver -i "$build_path_c"/3_watertight_clean/{} -o "$build_path_c"/3_watertight_clean_simple/{} -s "$MESHFUSION_PATH"/simplify.mlx
+  # ls "$build_path_c"/3_watertight_clean | parallel -P "$NPROC" --timeout "$TIMEOUT" \
+  #   meshlabserver -i "$build_path_c"/3_watertight_clean/{} -o "$build_path_c"/3_watertight_clean_simple/{} -s "$MESHFUSION_PATH"/simplify.mlx
+
+  python "$MESHFUSION_PATH"/3_meshlabserver.py \
+    --in_dir "$build_path_c"/3_watertight_clean \
+    --out_dir "$build_path_c"/3_watertight_clean_simple \
+    --script_path "$MESHFUSION_PATH"/simplify.mlx \
+    --n_proc "$NPROC" \
+    --use_pymeshlab
 
   echo "Process watertight meshes"
   python sample_mesh.py "$build_path_c"/3_watertight_clean_simple \

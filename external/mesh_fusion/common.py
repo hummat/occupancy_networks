@@ -171,8 +171,7 @@ def read_off(file):
 
             face = [int(index) for index in face]
 
-            assert face[0] == len(face) - 1, 'face should have %d vertices but as %d (%s)' % (
-                face[0], len(face) - 1, file)
+            assert face[0] == len(face) - 1, 'face should have %d vertices but has %d (%s)' % (face[0], len(face) - 1, file)
             assert face[0] == 3, 'only triangular meshes supported (%s)' % file
             for index in face:
                 assert 0 <= index < num_vertices, 'vertex %d (of %d vertices) does not exist (%s)' % (
