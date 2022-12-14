@@ -2,7 +2,7 @@ source dataset_shapenet/config.sh
 
 # Function for processing a single model
 reorganize() {
-  modelname="$(basename -- $3)"
+  modelname=$(basename -- "$3")
   output_path="$2/$modelname"
   build_path="$1"
 

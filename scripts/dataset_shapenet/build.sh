@@ -65,7 +65,7 @@ do
   python "$MESHFUSION_PATH"/3_meshlabserver.py \
     --in_dir "$build_path_c"/2_watertight \
     --out_dir "$build_path_c"/3_watertight_clean \
-    --script_path "$MESHFUSION_PATH"/remove.mlx \
+    --script_path "$MESHFUSION_PATH"/clean.mlx \
     --n_proc "$NPROC" \
     --use_pymeshlab
 
@@ -93,7 +93,7 @@ do
     --float16
 
   echo "Delete temporary files"
-  rm -dr "$build_path_c"/0_in \
+    rm -dr "$build_path_c"/0_in \
     "$build_path_c"/1_scaled \
     "$build_path_c"/1_transform \
     "$build_path_c"/2_depth \

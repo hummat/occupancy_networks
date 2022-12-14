@@ -63,7 +63,7 @@ echo "Clean watertight meshes"
 python "$MESHFUSION_PATH"/3_meshlabserver.py \
   --in_path "$build_path_c/2_watertight/$HASH.off" \
   --out_path "$build_path_c/3_watertight_clean/$HASH.off" \
-  --script_path "$MESHFUSION_PATH"/remove.mlx \
+  --script_path "$MESHFUSION_PATH"/clean.mlx \
   --use_pymeshlab \
   --overwrite
 

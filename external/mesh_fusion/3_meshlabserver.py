@@ -10,7 +10,6 @@ class RunMeshLabServerCommand:
     def __init__(self):
         parser = self.get_parser()
         self.options = parser.parse_args()
-        self.is_glob = False
 
     @staticmethod
     def get_parser():
@@ -45,7 +44,6 @@ class RunMeshLabServerCommand:
         if self.options.in_dir:
             if os.path.isdir(self.options.in_dir):
                 return self.read_directory(self.options.in_dir)
-            self.is_glob = True
             return glob(self.options.in_dir)
         return [self.options.in_path]
 
